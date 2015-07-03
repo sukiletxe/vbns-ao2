@@ -1,0 +1,5 @@
+*.pyc
+*.htm
+*.html
+src/build
+src/dist
