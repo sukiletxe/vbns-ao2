@@ -18,5 +18,6 @@ You will need:
 * Python (I use version 2.7.10).
 * Pyserial
 * accessible_output2 and libloader, get them from <http://hg.q-continuum.net>
+
 You will need py2exe to make a compiled executable.
 
