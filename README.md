@@ -1,11 +1,13 @@
 # vbns-AO2
+## Introduction
 This is a braille N'Speak emulator, which works with MS-DOS screen readers. It was originally created by [Tyler Spivey](https://www.allinaccess.com), and modified by Sukil Etxenike. [Here is the original version](http://batsupport.com/unsupported/dosbox/vbns.zip).
 
+## Variants
 This project has two versions:
 * [One  which, as the original version, uses eSpeak](https://github.com/sukiletxe/vbns-espeak)
 * And this one, which can interact with many Windows screen readers and SAPI.
 
-Note that at this stage, this version is **not** ready to be even tested. It actually has no difference with the eSpeak version.
+Note that at this stage, this version is **not** ready to be even tested. It actually has no difference with the eSpeak version, because it is derived directly from it.
 
 ## Requirements
 You will need Com0Com for the emulator to work properly:
