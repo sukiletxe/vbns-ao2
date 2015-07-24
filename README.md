@@ -19,7 +19,7 @@ You will need Com0Com for the emulator to work properly:
 You will need:
 * Python (I use version 2.7.10).
 * Pyserial
-* accessible_output2 and libloader, which are included. They can be downloaded from <http://hg.q-continuum.net>.
+* accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included, although they can be downloaded from <http://hg.q-continuum.net>.
 
 You will need py2exe to make a compiled executable.
 
