@@ -7,7 +7,7 @@ This project has two versions:
 * [One  which, as the original version, uses eSpeak](https://github.com/sukiletxe/vbns-espeak)
 * And this one, which can interact with many Windows screen readers and SAPI.
 
-Note that at this stage, this version is **not** ready to be even tested. It actually has no difference with the eSpeak version, because it is derived directly from it.
+Note that at this stage, this version works when run from source, but when compiling it doesn't run correctly.
 
 ## Requirements
 You will need Com0Com for the emulator to work properly:
@@ -19,7 +19,7 @@ You will need Com0Com for the emulator to work properly:
 You will need:
 * Python (I use version 2.7.10).
 * Pyserial
-* accessible_output2 and libloader, get them from <http://hg.q-continuum.net>
+* accessible_output2 and libloader, which are included. They can be downloaded from <http://hg.q-continuum.net>.
 
 You will need py2exe to make a compiled executable.
 
