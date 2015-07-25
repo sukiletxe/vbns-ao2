@@ -1,8 +1,8 @@
 ﻿import accessible_output2.outputs as ao2
 import cmd
-def speak(text, interrupt):
+def speak(text, interrupt = False):
     global o
-    o.speak(text, interrupt = 0)
+    o.speak(text, interrupt)
 
 def menu():
     global o, vlist
