@@ -26,6 +26,6 @@ setup(
             "dll_excludes": ["CRYPT32.dll"],
             "compressed": True,
         }
-    },
+    },  
     console=['emu.py'],
 )

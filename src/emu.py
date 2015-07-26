@@ -1,6 +1,9 @@
 import serial, threading, cStringIO, cmd, time
 import string
 import tts
+import sys, fix_win32com
+if hasattr(sys, "frozen"):
+    fix_win32com.fix()
 rate_map = (-10, -8, -6, -4, -2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 rate, pitch = 5, 5
 tts.set_output()
