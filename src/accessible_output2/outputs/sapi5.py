@@ -92,4 +92,4 @@ class SAPI5(Output):
    return True
   return False
 
-output_class = SAPI5
+  output_class = SAPI5

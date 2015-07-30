@@ -19,15 +19,6 @@ emu com8 --sapi
 
 Will use the COM8 port (the default one for ASAP in Talking Dosbox), and will open a menu to select a SAPI voice. If you omit the --sapi switch, the screen reader will be automatically detected, and if you append a number to the switch, the voice corresponding to that number in the menu will be used.
 
-Note: If the detected screen reader is JAWS or you choose to use SAPI, you may see a message like this:
-
->Rebuilding cache of generated files for COM support...
-> Checking 105C4321-CB93-11D4-9839-00C0F0214711x0x1x0
-> Checking C866CA3A-32F7-11D2-9602-00C04F8EE628x0x5x4
-> Done.
-
-This is a warning (not an error) of Python, which as far as I know, can't be removed. However, it can be safely ignored, as the program will run properly.
-
 ### To run from source and compile
 You will need:
 * Python (I use version 2.7.10).
