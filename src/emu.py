@@ -8,7 +8,7 @@ rate_map = (-10, -8, -6, -4, -2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 rate, pitch = 5, 5
 tts.set_output()
 tts.speak("ready", True)
-port = serial.serial_for_url(cmd.args.comport, 9600)
+port = serial.serial_for_url(cmd.args.port, 9600)
 port.setDsrDtr(0)
 cmdchar = '\x05'
 buffer = cStringIO.StringIO()

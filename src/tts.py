@@ -4,6 +4,12 @@ def speak(text, interrupt = False):
     global o
     o.speak(text, interrupt)
 
+def get_output():
+    global o
+    if o.name == "Unnamed Output":
+        return o.get_first_available_output().name
+    return o.name
+
 def menu():
     global o, vlist
     print ("Select a voice from the following menu.")
@@ -22,12 +28,14 @@ def menu():
 
 def set_output():
     global o, vlist
-    if cmd.args.sapi == 0:
-        o = ao2.auto.Auto()
-    else:
+    if cmd.args.sapi != 0:
         o = ao2.sapi5.SAPI5()
         vlist = o.list_voices()
         if cmd.args.sapi == -1:
             menu()
         else:
             o.set_voice(vlist[cmd.args.sapi-1])
+    else:
+        o = ao2.auto.Auto()
+        if get_output() == "sapi5":
+            o = ao2.sapi5.SAPI5()
