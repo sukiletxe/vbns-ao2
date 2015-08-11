@@ -26,6 +26,7 @@ You will need:
 * [Python for Windows Extensions](http://sourceforge.net/projects/pywin32/)
 * accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included and the firs one is modified. The originals can be downloaded from <http://hg.q-continuum.net>.
 * [Pandoc](http://pandoc.org/) to generate the documentation.
+* [7-Zip](http://7-zip.org) to compress the compiled executable using the included batch file.
 
 You will need py2exe to make a compiled executable. Also, to make the compiled executable run properly, you will need to delete the gen_py folder of the win32com package, usually found at C:\Python27\Lib\site-packages\win32com.
 

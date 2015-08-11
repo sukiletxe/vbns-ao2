@@ -3,3 +3,4 @@
 *.html
 src/build
 src/dist
+src/*.zip
