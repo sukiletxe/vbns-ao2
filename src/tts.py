@@ -4,11 +4,17 @@ def speak(text, interrupt = False):
     global o
     o.speak(text, interrupt)
 
+def silence():
+    try:
+        o.silence()
+    except:
+        pass
+
 def get_output():
     global o
     if o.name == "Unnamed Output":
-        return o.get_first_available_output().name
-    return o.name
+        return o.get_first_available_output()
+    return o
 
 def menu():
     global o, vlist
@@ -26,16 +32,15 @@ def menu():
         print("Invalid option.")
         menu()
 
-def set_output():
+def set_output(output):
     global o, vlist
-    if cmd.args.sapi != 0:
+    if output != 0:
         o = ao2.sapi5.SAPI5()
         vlist = o.list_voices()
-        if cmd.args.sapi == -1:
+        if output == -1:
             menu()
         else:
             o.set_voice(vlist[cmd.args.sapi-1])
     else:
         o = ao2.auto.Auto()
-        if get_output() == "sapi5":
-            o = ao2.sapi5.SAPI5()
+        o = get_output()
