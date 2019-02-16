@@ -9,7 +9,6 @@ rate, pitch = 5, 5
 tts.set_output(cmd.args.sapi)
 tts.speak("ready", True)
 port = serial.serial_for_url(cmd.args.port, 9600)
-port.setDsrDtr(0)
 cmdchar = '\x05'
 buffer = cStringIO.StringIO()
 in_command = False
