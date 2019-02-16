@@ -16,6 +16,7 @@ in_command = False
 num=""
 lst=[]
 stopped=True
+signal.signal(signal.SIGINT, SIG_DFL)
 def parse(ch):
  global in_command, num, lst
  if ch == '\x18':
