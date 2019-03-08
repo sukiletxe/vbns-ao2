@@ -2,7 +2,7 @@
 import cmd
 def speak(text, interrupt = False):
     global o
-    o.speak(text.decode("cp437), interrupt)
+    o.speak(text.decode("cp437"), interrupt)
 
 def silence():
     try:
