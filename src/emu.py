@@ -1,4 +1,4 @@
-import serial, threading, cStringIO, cmd, time
+import serial, threading, cStringIO, cmd, time, signal
 import string
 import tts
 import sys, fix_win32com
@@ -15,7 +15,7 @@ in_command = False
 num=""
 lst=[]
 stopped=True
-signal.signal(signal.SIGINT, SIG_DFL)
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 def parse(ch):
  global in_command, num, lst
  if ch == '\x18':
