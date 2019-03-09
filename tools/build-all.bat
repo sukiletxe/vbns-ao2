@@ -1,2 +1,2 @@
-call build-readme
+python build-readme
 call build-zip
