@@ -21,11 +21,9 @@ Will use the COM8 port (the default one for ASAP in Talking Dosbox), and will op
 
 ### To run from source and compile
 You will need:
-* Python (I use version 2.7.10).
-* Pyserial (you can install it using PIP)
-* [Python for Windows Extensions](http://sourceforge.net/projects/pywin32/)
-* accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included and the firs one is modified. The originals can be downloaded from <http://hg.q-continuum.net>.
-* [Pandoc](http://pandoc.org/) to generate the documentation.
+* Python (I use version 2.7.15).
+* accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included and the first one is modified. The originals can be downloaded from <http://hg.q-continuum.net>.
+* Markdown, pywin32, and pyserial (install using pip, and run `pywin32_postinstall.py -install` afterwards).
 * [7-Zip](http://7-zip.org) to compress the compiled executable using the included batch file.
 
 You will need py2exe to make a compiled executable. Also, to make the compiled executable run properly, you will need to delete the gen_py folder of the win32com package, usually found at C:\Python27\Lib\site-packages\win32com.
