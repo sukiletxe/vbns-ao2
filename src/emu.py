@@ -65,7 +65,7 @@ def process(lst):
  v = sb.getvalue()
  if v.strip() == '': return
  if cmd.args.espeak!="":
-  synth.speak(v.decode("cp437"))
+  synth.speak(v)
  else:
   tts.speak(v, False)
 
