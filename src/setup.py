@@ -1,6 +1,6 @@
 from  setuptools import setup, find_packages
 import py2exe
-import platform, fnmatch
+import platform, fnmatch, os
 from glob import glob
 import accessible_output2
 def get_data():
