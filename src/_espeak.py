@@ -15,7 +15,7 @@ except ImportError:
 from ctypes import *
 import os
 import codecs
-
+import platform
 isSpeaking = False
 lastIndex = None
 bgThread=None
@@ -274,7 +274,10 @@ def espeak_errcheck(res, func, args):
 
 def initialize():
 	global espeakDLL, bgThread, bgQueue, player
-	espeakDLL=cdll.LoadLibrary(r"espeak.dll")
+	if platform.architecture()[0][:2] == "64":
+		espeakDLL=cdll.LoadLibrary(r"espeak64.dll")
+	else:
+		espeakDLL=cdll.LoadLibrary(r"espeak.dll")
 	espeakDLL.espeak_Info.restype=c_char_p
 	espeakDLL.espeak_Synth.errcheck=espeak_errcheck
 	espeakDLL.espeak_SetVoiceByName.errcheck=espeak_errcheck

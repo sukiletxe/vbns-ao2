@@ -5,9 +5,9 @@ from glob import glob
 import accessible_output2
 def get_data():
   if platform.architecture()[0][:2] == "32":
-   return [("Microsoft.VC90.CRT", glob("windows_vc++/msvc32/Microsoft.VC90.CRT/*"))]
+   return [("Microsoft.VC90.CRT", glob("windows_vc++/msvc32/Microsoft.VC90.CRT/*")), ("", ["espeak.dll"])]
   elif platform.architecture()[0][:2] == "64":
-   return [("Microsoft.VC90.CRT", glob("windows_vc++/msvc64/Microsoft.VC90.CRT/*"))]
+   return [("Microsoft.VC90.CRT", glob("windows_vc++/msvc64/Microsoft.VC90.CRT/*")), ("", ["espeak64.dll"])]
 
 def get_espeak():
     answer = []
@@ -19,7 +19,6 @@ def get_espeak():
         new = (root, tmp)
         tmp = []
         answer.append(new)
-    answer.append(("", ["espeak.dll"]))
     return answer
 
 setup(
