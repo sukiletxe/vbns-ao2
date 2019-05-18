@@ -1,6 +1,6 @@
 from  setuptools import setup, find_packages
 import py2exe
-import platform, fnmatch, os
+import platform, os
 from glob import glob
 import accessible_output2
 def get_data():
@@ -12,7 +12,7 @@ def get_data():
 def get_espeak():
     answer = []
     tmp = []
-    for root, dirs, files in os.walk("espeak-data"):
+    for root, dirs, files in os.walk("espeak-ng-data"):
         for item in glob(os.path.join(root, "*")):
             if os.path.isfile(item):
                 tmp.append(item)

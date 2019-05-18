@@ -1,25 +1,26 @@
 #nvwave.py
 #A part of NonVisual Desktop Access (NVDA)
-#Copyright (C) 2006-2008 NVDA Contributors <http://www.nvda-project.org/>
+#Copyright (C) 2007-2017 NV Access Limited, Aleksey Sadovoy
 #This file is covered by the GNU General Public License.
 #See the file COPYING for more details.
 
 """Provides a simple Python interface to playing audio using the Windows multimedia waveOut functions, as well as other useful utilities.
 """
 
-from __future__ import with_statement
 import threading
 from ctypes import *
 from ctypes.wintypes import *
+import time
+import atexit
+import wave
+import logging as log
 
 __all__ = (
 	"WavePlayer", "getOutputDeviceNames", "outputDeviceIDToName", "outputDeviceNameToID",
 )
-
+INFINITE = 0xffffffff
 winmm = windll.winmm
 kernel32 = windll.kernel32
-
-INFINITE = 0xffffffff
 
 HWAVEOUT = HANDLE
 LPHWAVEOUT = POINTER(HWAVEOUT)
@@ -77,7 +78,7 @@ class WAVEOUTCAPS(Structure):
 	# Set argument types.
 winmm.waveOutOpen.argtypes = (LPHWAVEOUT, UINT, LPWAVEFORMATEX, DWORD, DWORD, DWORD)
 
-# Initialise error checking.
+# Initialize error checking.
 def _winmm_errcheck(res, func, args):
 	if res != MMSYSERR_NOERROR:
 		buf = create_unicode_buffer(256)
@@ -94,6 +95,9 @@ class WavePlayer(object):
 	"""Synchronously play a stream of audio.
 	To use, construct an instance and feed it waveform audio using L{feed}.
 	"""
+	#: A lock to prevent WaveOut* functions from being called simultaneously, as this can cause problems even if they are for different HWAVEOUTs.
+	_global_waveout_lock = threading.RLock()	
+	_audioDucker=None
 
 	def __init__(self, channels, samplesPerSec, bitsPerSample, outputDevice=WAVE_MAPPER, closeWhenIdle=True):
 		"""Constructor.
@@ -141,7 +145,8 @@ class WavePlayer(object):
 			wfx.nBlockAlign = self.bitsPerSample / 8 * self.channels
 			wfx.nAvgBytesPerSec = self.samplesPerSec * wfx.nBlockAlign
 			waveout = HWAVEOUT(0)
-			winmm.waveOutOpen(byref(waveout), self.outputDeviceID, LPWAVEFORMATEX(wfx), self._waveout_event, 0, CALLBACK_EVENT)
+			with self._global_waveout_lock:
+				winmm.waveOutOpen(byref(waveout), self.outputDeviceID, LPWAVEFORMATEX(wfx), self._waveout_event, 0, CALLBACK_EVENT)
 			self._waveout = waveout.value
 			self._prev_whdr = None
 
@@ -154,15 +159,19 @@ class WavePlayer(object):
 		@type data: str
 		@raise WindowsError: If there was an error playing the audio.
 		"""
+		if self._audioDucker and not self._audioDucker.enable():
+			return
 		whdr = WAVEHDR()
 		whdr.lpData = data
 		whdr.dwBufferLength = len(data)
 		with self._lock:
 			with self._waveout_lock:
 				self.open()
-				winmm.waveOutPrepareHeader(self._waveout, LPWAVEHDR(whdr), sizeof(WAVEHDR))
+				with self._global_waveout_lock:
+					winmm.waveOutPrepareHeader(self._waveout, LPWAVEHDR(whdr), sizeof(WAVEHDR))
 				try:
-					winmm.waveOutWrite(self._waveout, LPWAVEHDR(whdr), sizeof(WAVEHDR))
+					with self._global_waveout_lock:
+						winmm.waveOutWrite(self._waveout, LPWAVEHDR(whdr), sizeof(WAVEHDR))
 				except WindowsError, e:
 					self.close()
 					raise e
@@ -182,7 +191,8 @@ class WavePlayer(object):
 				kernel32.WaitForSingleObject(self._waveout_event, INFINITE)
 			with self._waveout_lock:
 				assert self._waveout, "waveOut None after wait"
-				winmm.waveOutUnprepareHeader(self._waveout, LPWAVEHDR(self._prev_whdr), sizeof(WAVEHDR))
+				with self._global_waveout_lock:
+					winmm.waveOutUnprepareHeader(self._waveout, LPWAVEHDR(self._prev_whdr), sizeof(WAVEHDR))
 			self._prev_whdr = None
 
 	def pause(self, switch):
@@ -190,13 +200,20 @@ class WavePlayer(object):
 		@param switch: C{True} to pause playback, C{False} to unpause.
 		@type switch: bool
 		"""
+		if self._audioDucker and self._waveout:
+			if switch:
+				self._audioDucker.disable()
+			else:
+				self._audioDucker.enable()
 		with self._waveout_lock:
 			if not self._waveout:
 				return
 			if switch:
-				winmm.waveOutPause(self._waveout)
+				with self._global_waveout_lock:
+					winmm.waveOutPause(self._waveout)
 			else:
-				winmm.waveOutRestart(self._waveout)
+				with self._global_waveout_lock:
+					winmm.waveOutRestart(self._waveout)
 
 	def idle(self):
 		"""Indicate that this player is now idle; i.e. the current continuous segment  of audio is complete.
@@ -211,17 +228,20 @@ class WavePlayer(object):
 					return
 				if self.closeWhenIdle:
 					self._close()
+			if self._audioDucker: self._audioDucker.disable()
 
 	def stop(self):
 		"""Stop playback.
 		"""
+		if self._audioDucker: self._audioDucker.disable()
 		with self._waveout_lock:
 			if not self._waveout:
 				return
 			try:
-				# Pausing first seems to make waveOutReset respond faster on some systems.
-				winmm.waveOutPause(self._waveout)
-				winmm.waveOutReset(self._waveout)
+				with self._global_waveout_lock:
+					# Pausing first seems to make waveOutReset respond faster on some systems.
+					winmm.waveOutPause(self._waveout)
+					winmm.waveOutReset(self._waveout)
 			except WindowsError:
 				# waveOutReset seems to fail randomly on some systems.
 				pass
@@ -239,7 +259,8 @@ class WavePlayer(object):
 				self._close()
 
 	def _close(self):
-		winmm.waveOutClose(self._waveout)
+		with self._global_waveout_lock:
+			winmm.waveOutClose(self._waveout)
 		self._waveout = None
 
 	def __del__(self):
@@ -251,7 +272,7 @@ def _getOutputDevices():
 	caps = WAVEOUTCAPS()
 	for devID in xrange(-1, winmm.waveOutGetNumDevs()):
 		try:
-			windll.winmm.waveOutGetDevCapsW(devID, byref(caps), sizeof(caps))
+			winmm.waveOutGetDevCapsW(devID, byref(caps), sizeof(caps))
 			yield devID, caps.szPname
 		except WindowsError:
 			# It seems that in certain cases, Windows includes devices which cannot be accessed.
@@ -273,7 +294,7 @@ def outputDeviceIDToName(ID):
 	"""
 	caps = WAVEOUTCAPS()
 	try:
-		windll.winmm.waveOutGetDevCapsW(ID, byref(caps), sizeof(caps))
+		winmm.waveOutGetDevCapsW(ID, byref(caps), sizeof(caps))
 	except WindowsError:
 		raise LookupError("No such device ID")
 	return caps.szPname

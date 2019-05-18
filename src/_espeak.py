@@ -1,14 +1,17 @@
+# -*- coding: UTF-8 -*-
 #synthDrivers/_espeak.py
 #A part of NonVisual Desktop Access (NVDA)
-import logging as log
-#Copyright (C) 2006-2007 NVDA Contributors <http://www.nvda-project.org/>
+#Copyright (C) 2007-2012 NV Access Limited, Peter Vágner
 #This file is covered by the GNU General Public License.
 #See the file COPYING for more details.
-
+import logging as log
 import time
 import nvwave
 import threading
-import Queue
+try:
+	import Queue as queue # Python 2.7 import
+except ImportError:
+	import queue # Python 3 import
 from ctypes import *
 import os
 import codecs
@@ -22,7 +25,7 @@ espeakDLL=None
 
 #Parameter bounds
 minRate=80
-maxRate=390
+maxRate=450
 minPitch=0
 maxPitch=99
 
@@ -81,6 +84,7 @@ class espeak_EVENT_id(Union):
 	_fields_=[
 		('number',c_int),
 		('name',c_char_p),
+		('string',c_char*8),
 	]
 
 class espeak_EVENT(Structure):
@@ -117,18 +121,22 @@ t_espeak_callback=CFUNCTYPE(c_int,POINTER(c_short),c_int,POINTER(espeak_EVENT))
 def callback(wav,numsamples,event):
 	try:
 		global player, isSpeaking, lastIndex
-		lastIndex = event.contents.user_data
+		if not isSpeaking:
+			return 1
+		for e in event:
+			if e.type==espeakEVENT_MARK:
+				lastIndex=int(e.id.name)
+			elif e.type==espeakEVENT_LIST_TERMINATED:
+				break
 		if not wav:
 			player.idle()
 			isSpeaking = False
 			return 0
-		if not isSpeaking:
-			return 1
 		if numsamples > 0:
 			try:
 				player.feed(string_at(wav, numsamples * sizeof(c_short)))
 			except:
-				log.debugWarning("Error feeding audio to nvWave",exc_info=True)
+				log.debug("Error feeding audio to nvWave",exc_info=True)
 		return 0
 	except:
 		log.error("callback", exc_info=True)
@@ -161,23 +169,21 @@ def _execWhenDone(func, *args, **kwargs):
 	else:
 		func(*args, **kwargs)
 
-def _speak(msg, index=None,isCharacter=False):
+def _speak(text):
 	global isSpeaking
 	uniqueID=c_int()
 	isSpeaking = True
-	flags = espeakCHARS_WCHAR 
-	if isCharacter: 
-		flags |= espeakSSML
-		msg = "<say-as type=spell-out>%s</say-as>"%msg
+	# eSpeak can only process compound emojis  when using a UTF8 encoding
+	text=text.encode('utf8',errors='ignore')
+	flags = espeakCHARS_UTF8 | espeakSSML | espeakPHONEMES
+	return espeakDLL.espeak_Synth(text,0,0,0,0,flags,byref(uniqueID),0)
 
-	return espeakDLL.espeak_Synth(unicode(msg),0,0,0,0,flags,byref(uniqueID),index)
-
-def speak(msg, index=None,isCharacter=False):
+def speak(text):
 	global bgQueue
-	_execWhenDone(_speak, msg, index, isCharacter, mustBeAsync=True)
+	_execWhenDone(_speak, text, mustBeAsync=True)
 
 def stop():
-	global isSpeaking, bgQueue
+	global isSpeaking, bgQueue, lastIndex
 	# Kill all speech from now.
 	# We still want parameter changes to occur, so requeue them.
 	params = []
@@ -187,13 +193,14 @@ def stop():
 			if item[0] != _speak:
 				params.append(item)
 			bgQueue.task_done()
-	except Queue.Empty:
+	except queue.Empty:
 		# Let the exception break us out of this loop, as queue.empty() is not reliable anyway.
 		pass
 	for item in params:
 		bgQueue.put(item)
 	isSpeaking = False
 	player.stop()
+	lastIndex=None
 
 def pause(switch):
 	global player
@@ -210,7 +217,7 @@ def getVoiceList():
 	voiceList=[]
 	for voice in voices:
 		if not voice: break
- 		voiceList.append(voice.contents)
+		voiceList.append(voice.contents)
 	return voiceList
 
 def getCurrentVoice():
@@ -277,12 +284,12 @@ def initialize():
 	espeakDLL.espeak_ListVoices.restype=POINTER(POINTER(espeak_VOICE))
 	espeakDLL.espeak_GetCurrentVoice.restype=POINTER(espeak_VOICE)
 	espeakDLL.espeak_SetVoiceByName.argtypes=(c_char_p,)
-	sampleRate=espeakDLL.espeak_Initialize(AUDIO_OUTPUT_SYNCHRONOUS,300,".",0)
+	sampleRate=espeakDLL.espeak_Initialize(AUDIO_OUTPUT_SYNCHRONOUS,300, ".", 0)
 	if sampleRate<0:
 		raise OSError("espeak_Initialize %d"%sampleRate)
 	player = nvwave.WavePlayer(channels=1, samplesPerSec=sampleRate, bitsPerSample=16)
 	espeakDLL.espeak_SetSynthCallback(callback)
-	bgQueue = Queue.Queue()
+	bgQueue = queue.Queue()
 	bgThread=BgThread()
 	bgThread.start()
 
@@ -302,8 +309,9 @@ def info():
 	return espeakDLL.espeak_Info()
 
 def getVariantDict():
-	dir='.\\espeak-data\\voices\\!v'
-	variantDict={"none":_("none")}
+	dir='synthDrivers\\espeak-ng-data\\voices\\!v'
+	# Translators: name of the default espeak varient.
+	variantDict={"none": pgettext("espeakVarient", "none")}
 	for fileName in os.listdir(dir):
 		if os.path.isfile("%s\\%s"%(dir,fileName)):
 			file=codecs.open("%s\\%s"%(dir,fileName))
