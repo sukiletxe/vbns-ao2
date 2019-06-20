@@ -5,7 +5,7 @@ This is a braille N'Speak emulator, which works with MS-DOS screen readers. If a
 ## Speech outputs
 This project supports two output methods:
 
-* [One  which, as the original version, uses eSpeak](https://github.com/sukiletxe/vbns-espeak)
+* [One which, as the original version, uses eSpeak](https://github.com/sukiletxe/vbns-espeak)
 * And accessible_output2 library, which can interact with many Windows screen readers and SAPI.
 
 ## Requirements
@@ -32,8 +32,8 @@ You will need:
 
 * Python (I use version 2.7.15).
 * accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included and the first one is modified. The originals can be downloaded from <http://hg.q-continuum.net>.
-* Markdown, pywin32, and pyserial (install using pip, and run `pywin32_postinstall.py -install` afterwards).
+* Other dependencies.  Use `pip install -r requirements.txt` to install them, and run `pywin32_postinstall.py -install` afterwards.
 * [7-Zip](http://7-zip.org) to compress the compiled executable using the included batch file.
 
-You will need py2exe to make a compiled executable. Also, to make the compiled executable run properly, you will need to delete the gen_py folder of the win32com package, usually found at C:\Python27\Lib\site-packages\win32com.
+To compile the executable, install `py2exe-py2`, and run `python setup.py py2exe`. Also, to make it run properly, you will need to delete the gen_py folder of the win32com package, usually found at C:\Python27\Lib\site-packages\win32com.
 

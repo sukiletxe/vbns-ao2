@@ -1,0 +1,4 @@
+Markdown
+pyserial
+pywin32
+winpaths
