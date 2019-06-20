@@ -31,7 +31,7 @@ Will use the COM8 port (the default one for ASAP in Talking Dosbox), and the eng
 You will need:
 
 * Python (I use version 2.7.15).
-* accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included and the first one is modified. The originals can be downloaded from <http://hg.q-continuum.net>.
+* accessible_output2, libloader and platform_utils, by Christopher Toth and Tyler Spivey. They are included. They can be downloaded from <http://hg.q-continuum.net>.
 * Other dependencies.  Use `pip install -r requirements.txt` to install them, and run `pywin32_postinstall.py -install` afterwards.
 * [7-Zip](http://7-zip.org) to compress the compiled executable using the included batch file.
 
