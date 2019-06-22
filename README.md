@@ -1,6 +1,6 @@
 # vbns
 ## Introduction
-This is a braille N'Speak emulator, which works with MS-DOS screen readers. If a MS-DOS screen reader (such as ASAP or Habla) is run in a MS-DOS emulator, for example Dosbox, and the propper software is installed (see below) a screen reader of eSpeak will output the information sent to the MS-DOS screen reader. It was originally created by [Tyler Spivey](https://www.allinaccess.com), and modified by Sukil Etxenike. [Here is the original version](http://batsupport.com/unsupported/dosbox/vbns.zip).
+This is a braille N'Speak emulator, which sends the input from a serial port to a Windows screen reader, SAPI 5 or Espeak-NG. It can be used with a MS-DOS emulator (like Dosbox) and a MS-DOS screen reader (such as asap or habla) to hear the text sent by the screen reader in Windows itself. It was originally created by [Tyler Spivey](https://www.allinaccess.com), and modified by Sukil Etxenike. [Here is the original version](http://batsupport.com/unsupported/dosbox/vbns.zip).
 
 ## Speech outputs
 This project supports two output methods:
