@@ -1,4 +1,5 @@
 Markdown
 pyserial
 pywin32
+py2exe-py2
 winpaths
