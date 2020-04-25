@@ -1,6 +1,6 @@
 import argparse, os, sys
 from configobj import ConfigObj
-merged = argparse.namespace() # Used to merge config and command line
+merged = argparse.Namespace() # Used to merge config and command line
 
 def parse_cmd(namespace):
     """
@@ -19,7 +19,7 @@ def parse_config(namespace, config = 'emu.ini'):
     """
     Parse configuration file.
     """
-    if os.path.exists(os.path.join(os.curdir, config):
+    if os.path.exists(os.path.join(os.curdir, config)):
         cdict = ConfigObj(config)
         # Put config in our namespace
         for key, value in cdict:
